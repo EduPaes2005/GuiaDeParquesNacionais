@@ -1,8 +1,8 @@
 // screens/MinhasFotosScreen.js
 import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, FlatList, Alert, StyleSheet, Modal } from 'react-native';
-import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
+import { Camera, Trash2, Edit3, Image as ImageIcon, Lock } from 'lucide-react-native';
 import { globalStyles, COLORS } from '../theme/styles';
 import { AuthContext } from '../context/AuthContext';
 
@@ -11,58 +11,40 @@ export default function MinhasFotosScreen() {
   const [username, setUsername] = useState('');
   const [photos, setPhotos] = useState([]);
 
-  // --- Estados do Modal de Edição (PUT) ---
   const [modalEditVisible, setModalEditVisible] = useState(false);
   const [fotoEditandoId, setFotoEditandoId] = useState(null);
   const [novaLegenda, setNovaLegenda] = useState('');
 
-  // --- Estados do Modal de Exclusão (DELETE) ---
-  const [modalDeleteVisible, setModalDeleteVisible] = useState(false);
-  const [fotoDeletandoId, setFotoDeletandoId] = useState(null);
-
-  // Fluxo de Autenticação
   const handleLogin = () => {
     if(!login(username, '1234')) {
-      Alert.alert('Erro', 'Por favor insira um usuário válido.');
+      Alert.alert('Acesso Negado', 'Insira um usuário válido para acessar a câmera.');
     }
   };
 
-  // --- Operação POST ---
   const handlePostPhoto = async () => {
-    const cameraPermission = await Camera.requestCameraPermissionsAsync();
-    if (cameraPermission.status !== 'granted') {
-      Alert.alert('Permissão', 'Acesso à câmera é obrigatório para registrar as paisagens.');
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permissão necessária', 'Precisamos de acesso à câmera para registrar a paisagem.');
       return;
     }
 
     let result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.7,
+      quality: 0.8,
     });
 
     if (!result.canceled) {
       const novaFoto = {
         id: Date.now().toString(),
         uri: result.assets[0].uri,
-        legenda: 'Nova foto do parque'
+        legenda: 'Registro da Trilha'
       };
-
-      // Simulação da Requisição POST
-      console.log('REQUEST: POST /api/v1/photos -> Body:', novaFoto);
       setPhotos(current => [novaFoto, ...current]);
     }
   };
 
-  // --- Operação PUT (Abrir Modal e Salvar) ---
-  const abrirModalEdicao = (foto) => {
-    setFotoEditandoId(foto.id);
-    setNovaLegenda(foto.legenda);
-    setModalEditVisible(true);
-  };
-
   const confirmarEdicao = () => {
     if (fotoEditandoId) {
-      console.log(`REQUEST: PUT /api/v1/photos/${fotoEditandoId} -> Data:`, { legenda: novaLegenda });
       setPhotos(current => 
         current.map(img => img.id === fotoEditandoId ? { ...img, legenda: novaLegenda } : img)
       );
@@ -71,205 +53,142 @@ export default function MinhasFotosScreen() {
     }
   };
 
-  // --- Operação DELETE (Abrir Modal e Apagar) ---
-  const abrirModalDelete = (id) => {
-    setFotoDeletandoId(id);
-    setModalDeleteVisible(true);
+  const handleDeletePhoto = (id) => {
+    setPhotos(current => current.filter(img => img.id !== id));
   };
 
-  const confirmarDelete = () => {
-    if (fotoDeletandoId) {
-      console.log(`REQUEST: DELETE /api/v1/photos/${fotoDeletandoId}`);
-      setPhotos(current => current.filter(img => img.id !== fotoDeletandoId));
-      setModalDeleteVisible(false);
-      setFotoDeletandoId(null);
-    }
-  };
-
-  // Tela de Bloqueio se não estiver logado
+  // TELA DE AUTENTICAÇÃO (AuthSim do Repositório Web)
   if (!signed) {
     return (
       <View style={[globalStyles.container, { justifyContent: 'center' }]}>
-        <View style={globalStyles.glassCard}>
-          <Text style={[globalStyles.title, { textAlign: 'center' }]}>Galeria Restrita</Text>
-          <Text style={[globalStyles.textRegular, { textAlign: 'center', marginBottom: 20, color: COLORS.textMuted }]}>
-            Autentique-se para interagir com o gerenciamento de fotos.
-          </Text>
+        <View style={globalStyles.card}>
+          <View style={{ alignItems: 'center', marginBottom: 20 }}>
+            <View style={styles.iconCircle}>
+              <Lock size={32} color={COLORS.emerald500} />
+            </View>
+            <Text style={[globalStyles.title, { marginTop: 15, marginBottom: 5 }]}>Acesso Restrito</Text>
+            <Text style={[globalStyles.textRegular, { textAlign: 'center' }]}>
+              Faça login para acessar a câmera e salvar suas recordações dos parques.
+            </Text>
+          </View>
 
           <TextInput
             style={globalStyles.input}
-            placeholder="Nome de Usuário"
+            placeholder="Seu nome de aventureiro..."
             placeholderTextColor={COLORS.textMuted}
             value={username}
             onChangeText={setUsername}
           />
           
-          <TouchableOpacity style={globalStyles.buttonNeon} onPress={handleLogin}>
-            <Text style={globalStyles.buttonNeonText}>Desbloquear com Login</Text>
+          <TouchableOpacity style={globalStyles.buttonPrimary} onPress={handleLogin}>
+            <Text style={globalStyles.buttonPrimaryText}>Entrar na Galeria</Text>
           </TouchableOpacity>
         </View>
       </View>
     );
   }
 
-  // Renderização principal da Galeria
+  // TELA DA CÂMERA E GALERIA (CameraSim do Repositório Web)
   return (
     <View style={globalStyles.container}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text style={globalStyles.title}>Minhas Fotos</Text>
-        <TouchableOpacity onPress={logout} style={{ padding: 10 }}>
-          <Text style={{ color: COLORS.dangerNeon, fontWeight: 'bold' }}>Sair</Text>
+      <View style={styles.header}>
+        <Text style={globalStyles.title}>Câmera & Diário</Text>
+        <TouchableOpacity onPress={logout} style={styles.logoutBtn}>
+          <Text style={styles.logoutText}>Sair</Text>
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={globalStyles.buttonNeon} onPress={handlePostPhoto}>
-        <Text style={globalStyles.buttonNeonText}>📸 Capturar Paisagem (POST)</Text>
-      </TouchableOpacity>
+      {/* Simulador do Viewfinder da Câmera */}
+      <View style={styles.cameraViewfinder}>
+        <Camera size={48} color={COLORS.textMuted} style={{ marginBottom: 10 }} />
+        <Text style={globalStyles.textRegular}>Visor da Câmera Pronto</Text>
+        <TouchableOpacity style={[globalStyles.buttonPrimary, { marginTop: 20, paddingHorizontal: 30 }]} onPress={handlePostPhoto}>
+          <Camera size={20} color="#fff" style={{ marginRight: 8 }} />
+          <Text style={globalStyles.buttonPrimaryText}>Capturar Foto</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.galleryHeader}>
+        <ImageIcon size={20} color={COLORS.emerald500} />
+        <Text style={styles.galleryTitle}>Meus Registros</Text>
+      </View>
 
       <FlatList
         data={photos}
         keyExtractor={item => item.id}
         numColumns={2}
-        contentContainerStyle={{ marginTop: 10, paddingBottom: 30 }}
+        contentContainerStyle={{ paddingBottom: 30 }}
         renderItem={({ item }) => (
-          <View style={[globalStyles.glassCard, styles.photoCard]}>
+          <View style={styles.photoCard}>
             <Image source={{ uri: item.uri }} style={styles.imageBox} />
-            <Text style={styles.legendaText} numberOfLines={1}>{item.legenda}</Text>
-            
-            <View style={styles.actionRow}>
-              {/* Botão de Editar */}
-              <TouchableOpacity onPress={() => abrirModalEdicao(item)} style={styles.actionButton}>
-                <Text style={styles.btnEditText}>Editar</Text>
-              </TouchableOpacity>
-              
-              {/* Botão de Excluir */}
-              <TouchableOpacity onPress={() => abrirModalDelete(item.id)} style={styles.actionButton}>
-                <Text style={styles.btnDeleteText}>Apagar</Text>
-              </TouchableOpacity>
+            <View style={styles.photoInfo}>
+              <Text style={styles.legendaText} numberOfLines={1}>{item.legenda}</Text>
+              <View style={styles.actionRow}>
+                <TouchableOpacity 
+                  onPress={() => {
+                    setFotoEditandoId(item.id);
+                    setNovaLegenda(item.legenda);
+                    setModalEditVisible(true);
+                  }} 
+                  style={styles.actionBtn}
+                >
+                  <Edit3 size={16} color={COLORS.emerald500} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => handleDeletePhoto(item.id)} style={styles.actionBtn}>
+                  <Trash2 size={16} color={COLORS.danger} />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         )}
         ListEmptyComponent={
-          <Text style={[globalStyles.textMuted, { textAlign: 'center', marginTop: 40 }]}>
-            Nenhuma foto registrada. Use a câmera acima!
+          <Text style={[globalStyles.textRegular, { textAlign: 'center', marginTop: 20 }]}>
+            Nenhuma foto registrada ainda.
           </Text>
         }
       />
 
-      {/* --- MODAL DE EDIÇÃO (PUT) --- */}
+      {/* Modal de Edição (Estilo Tailwind) */}
       <Modal visible={modalEditVisible} transparent={true} animationType="fade">
         <View style={styles.modalOverlay}>
-          <View style={[globalStyles.glassCard, styles.modalContent]}>
+          <View style={globalStyles.card}>
             <Text style={[globalStyles.title, { fontSize: 20 }]}>Editar Legenda</Text>
-            
             <TextInput
               style={globalStyles.input}
               value={novaLegenda}
               onChangeText={setNovaLegenda}
-              placeholder="Digite a nova legenda..."
+              placeholder="Nova legenda..."
               placeholderTextColor={COLORS.textMuted}
             />
-            
             <View style={styles.modalActions}>
-              <TouchableOpacity onPress={() => setModalEditVisible(false)} style={styles.modalButton}>
-                <Text style={{ color: COLORS.textMuted, fontWeight: 'bold', fontSize: 16 }}>Cancelar</Text>
+              <TouchableOpacity onPress={() => setModalEditVisible(false)} style={[globalStyles.buttonPrimary, { backgroundColor: COLORS.darkBorder, flex: 1, marginRight: 10 }]}>
+                <Text style={globalStyles.buttonPrimaryText}>Cancelar</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={confirmarEdicao} style={styles.modalButton}>
-                <Text style={{ color: COLORS.neonGreen, fontWeight: 'bold', fontSize: 16 }}>Salvar</Text>
+              <TouchableOpacity onPress={confirmarEdicao} style={[globalStyles.buttonPrimary, { flex: 1 }]}>
+                <Text style={globalStyles.buttonPrimaryText}>Salvar</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
-
-      {/* --- MODAL DE EXCLUSÃO (DELETE) --- */}
-      <Modal visible={modalDeleteVisible} transparent={true} animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={[globalStyles.glassCard, styles.modalContent, { borderColor: 'rgba(255, 51, 102, 0.4)' }]}>
-            <Text style={[globalStyles.title, { fontSize: 20, color: COLORS.dangerNeon }]}>Atenção!</Text>
-            
-            <Text style={[globalStyles.textRegular, { marginBottom: 20 }]}>
-              Tem certeza que deseja apagar esta foto permanentemente?
-            </Text>
-            
-            <View style={styles.modalActions}>
-              <TouchableOpacity onPress={() => setModalDeleteVisible(false)} style={styles.modalButton}>
-                <Text style={{ color: COLORS.textMuted, fontWeight: 'bold', fontSize: 16 }}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={confirmarDelete} style={styles.modalButton}>
-                <Text style={{ color: COLORS.dangerNeon, fontWeight: 'bold', fontSize: 16 }}>Sim, Apagar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  photoCard: {
-    flex: 0.5,
-    margin: 5,
-    padding: 8,
-    alignItems: 'center',
-  },
-  imageBox: {
-    width: '100%',
-    height: 110,
-    borderRadius: 12,
-  },
-  legendaText: {
-    color: '#ffffff',
-    fontSize: 13,
-    marginTop: 8,
-    fontWeight: '500',
-  },
-  actionRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.15)',
-  },
-  actionButton: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 12, 
-  },
-  btnEditText: {
-    color: COLORS.neonGreen,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  btnDeleteText: {
-    color: COLORS.dangerNeon,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  
-  // Estilos do Modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  modalContent: {
-    width: '100%',
-    padding: 25,
-    backgroundColor: 'rgba(10, 18, 14, 0.95)',
-  },
-  modalActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 15,
-  },
-  modalButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-  }
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
+  logoutBtn: { backgroundColor: 'rgba(239, 68, 68, 0.1)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6 },
+  logoutText: { color: COLORS.danger, fontWeight: 'bold' },
+  iconCircle: { width: 64, height: 64, borderRadius: 32, backgroundColor: COLORS.emerald900, justifyContent: 'center', alignItems: 'center' },
+  cameraViewfinder: { backgroundColor: '#000', borderRadius: 16, height: 200, justifyContent: 'center', alignItems: 'center', marginBottom: 25, borderWidth: 1, borderColor: COLORS.darkBorder },
+  galleryHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
+  galleryTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.textLight, marginLeft: 8 },
+  photoCard: { flex: 0.5, backgroundColor: COLORS.darkCard, margin: 5, borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderColor: COLORS.darkBorder },
+  imageBox: { width: '100%', height: 120 },
+  photoInfo: { padding: 10 },
+  legendaText: { color: COLORS.textLight, fontSize: 14, fontWeight: '500', marginBottom: 8 },
+  actionRow: { flexDirection: 'row', justifyContent: 'flex-end' },
+  actionBtn: { padding: 6, marginLeft: 10, backgroundColor: COLORS.darkBg, borderRadius: 6 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.7)', justifyContent: 'center', padding: 20 },
+  modalActions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
 });

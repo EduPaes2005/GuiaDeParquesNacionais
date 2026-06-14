@@ -59,13 +59,16 @@ function AppRoutes() {
               if (route.name === 'Galeria') return <Camera size={size} color={color} />;
               if (route.name === 'Config') return <Settings size={size} color={color} />;
             },
-            tabBarActiveTintColor: COLORS.neonGreen,
-            tabBarInactiveTintColor: '#6b8277',
+            tabBarActiveTintColor: COLORS.emerald500, // <--- Aqui muda o ícone ativo
+            tabBarInactiveTintColor: COLORS.textMuted,
             tabBarStyle: {
-              backgroundColor: '#05080c',
-              borderTopColor: COLORS.borderGlass,
-              borderTopWidth: 1.5,
-              elevation: 0, height: 60, paddingBottom: 5,
+              backgroundColor: COLORS.darkBg, // <--- Fundo do menu
+              borderTopColor: COLORS.darkBorder, // <--- Borda sutil de Tailwind
+              borderTopWidth: 1,
+              elevation: 0, 
+              height: 65, 
+              paddingBottom: 8,
+              paddingTop: 8,
             },
             headerShown: false
           })}

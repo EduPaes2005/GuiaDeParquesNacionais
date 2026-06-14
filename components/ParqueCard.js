@@ -44,23 +44,22 @@ export default function ParqueCard({ parque, onPress, isVisited }) {
 const styles = StyleSheet.create({
   cardContainer: {
     height: 220, marginBottom: 18, borderRadius: 16,
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
-    overflow: 'hidden', backgroundColor: '#000',
+    borderWidth: 1, borderColor: COLORS.darkBorder,
+    overflow: 'hidden', backgroundColor: COLORS.darkCard,
   },
   imageBg: { flex: 1, justifyContent: 'flex-end' },
   gradientOverlay: {
-    backgroundColor: 'rgba(0, 0, 0, 0.75)', // Efeito do gradient da web
+    backgroundColor: 'rgba(17, 24, 39, 0.85)', // Fundo dark bg semi-transparente
     padding: 16,
     borderBottomLeftRadius: 16, borderBottomRightRadius: 16,
   },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  parkName: { fontSize: 18, fontWeight: '700', color: '#ffffff', flex: 1 },
-  locationText: { color: '#aaaaaa', fontSize: 13, marginLeft: 6 },
+  parkName: { fontSize: 18, fontWeight: '700', color: COLORS.textLight, flex: 1 },
+  locationText: { color: COLORS.textMuted, fontSize: 13, marginLeft: 6 },
   badgeRow: { flexDirection: 'row', marginTop: 12 },
   badge: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(57, 255, 20, 0.1)',
+    flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.emerald900,
     borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4, marginRight: 8,
-    borderWidth: 1, borderColor: 'rgba(57, 255, 20, 0.3)',
   },
-  badgeText: { color: COLORS.neonGreen, fontSize: 11, fontWeight: '600', textTransform: 'capitalize', marginLeft: 4 },
+  badgeText: { color: COLORS.emerald500, fontSize: 12, fontWeight: '600', textTransform: 'capitalize', marginLeft: 4 },
 });

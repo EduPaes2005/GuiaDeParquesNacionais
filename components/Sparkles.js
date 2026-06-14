@@ -51,9 +51,9 @@ const styles = StyleSheet.create({
   sparkle: {
     position: 'absolute',
     width: 4, height: 4,
-    backgroundColor: COLORS.neonGreen,
+    backgroundColor: COLORS.emerald500,
     borderRadius: 2,
-    shadowColor: COLORS.neonGreen,
+    shadowColor: COLORS.emerald500,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1, shadowRadius: 6, elevation: 5
   }

@@ -70,12 +70,15 @@ export default function DetalhesScreen({ route, navigation }) {
         </View>
 
         <TouchableOpacity 
-          style={[globalStyles.buttonNeon, checked && styles.buttonChecked]} 
+          style={[globalStyles.buttonPrimary, checked && styles.buttonChecked, { marginTop: 10 }]} 
           onPress={() => toggleVisited(parkData)}
         >
-          <Text style={[globalStyles.buttonNeonText, checked && { color: '#22aa22' }]}>
-            {checked ? 'Desmarcar Visita' : 'Marcar como Visitado'}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+            {checked ? <CheckCircle2 size={22} color="#ffffff" /> : <Footprints size={22} color="#ffffff" />}
+            <Text style={[globalStyles.buttonPrimaryText, { marginLeft: 8 }]}>
+              {checked ? 'Já Visitei este Parque' : 'Marcar como Visitado'}
+            </Text>
+          </View>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -84,16 +87,16 @@ export default function DetalhesScreen({ route, navigation }) {
 
 const styles = StyleSheet.create({
   imageContainer: { width: '100%', height: 350, position: 'relative' },
-  floatingBackBtn: { position: 'absolute', top: 50, left: 20, backgroundColor: 'rgba(0,0,0,0.5)', padding: 12, borderRadius: 50, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)' },
-  contentContainer: { padding: 25, borderTopLeftRadius: 30, borderTopRightRadius: 30, marginTop: -30, backgroundColor: COLORS.background },
+  floatingBackBtn: { position: 'absolute', top: 50, left: 20, backgroundColor: 'rgba(17,24,39,0.7)', padding: 12, borderRadius: 50 },
+  contentContainer: { padding: 25, borderTopLeftRadius: 30, borderTopRightRadius: 30, marginTop: -30, backgroundColor: COLORS.darkBg },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 20 },
-  chip: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(57, 255, 20, 0.08)', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, marginRight: 10, marginBottom: 10, borderWidth: 1, borderColor: 'rgba(57, 255, 20, 0.2)' },
-  chipText: { color: COLORS.neonGreen, fontSize: 13, fontWeight: '600', marginLeft: 6 },
-  sectionBox: { backgroundColor: 'rgba(255,255,255,0.03)', padding: 20, borderRadius: 16, marginBottom: 18, borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)' },
+  chip: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.emerald900, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, marginRight: 10, marginBottom: 10 },
+  chipText: { color: COLORS.emerald500, fontSize: 13, fontWeight: '600', marginLeft: 6 },
+  sectionBox: { backgroundColor: COLORS.darkCard, padding: 20, borderRadius: 16, marginBottom: 18, borderWidth: 1, borderColor: COLORS.darkBorder },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#ffffff', marginLeft: 10 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.textLight, marginLeft: 10 },
   listItem: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 10 },
-  listText: { color: '#dddddd', fontSize: 15, marginLeft: 8, flex: 1, lineHeight: 22 },
-  bulletDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: COLORS.dangerNeon, marginTop: 8 },
-  buttonChecked: { borderColor: '#22aa22', backgroundColor: 'transparent' }
+  listText: { color: COLORS.textMuted, fontSize: 15, marginLeft: 8, flex: 1, lineHeight: 22 },
+  bulletDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: COLORS.danger, marginTop: 8 },
+  buttonChecked: { backgroundColor: COLORS.emerald600 }
 });
